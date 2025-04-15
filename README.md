@@ -11,13 +11,13 @@
 
 ---
 
-## 📄 보고서 보기
+## 보고서 보기
 
 - [보고서 PDF 열기](./20201914.pdf)
 
 ---
 
-## 📌 주요 내용
+## 주요 내용
 
 - CDCGAN 구조 설계 (Generator, Discriminator, Conditioning Mechanism)
 - PyTorch Lightning 기반 학습
