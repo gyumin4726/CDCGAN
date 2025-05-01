@@ -21,7 +21,6 @@ class CGenerator(nn.Module):
 
 
         # ConvNet Output Size Calculator https://asiltureli.github.io/Convolution-Layer-Calculator/
-        # TODO
         self.z_project = nn.Linear(nz, 50, bias=False)   
         self.label_emb = nn.Embedding(num_classes, 50)
         self.project = nn.Linear(100, 256 * 7 * 7, bias=False)
@@ -50,7 +49,6 @@ class CGenerator(nn.Module):
         
     
     def forward(self, z, c):
-        # TODO
         z_emb = self.z_project(z)
         c_emb = self.label_emb(c)  # (B, 50)
         x = torch.cat([z_emb, c_emb], dim=1)  # (B, nz+50)
@@ -67,7 +65,6 @@ class CDiscriminator(nn.Module):
         self.num_classes = num_classes
 
         # ConvNet Output Size Calculator https://asiltureli.github.io/Convolution-Layer-Calculator/
-        # TODO
         self.label_emb = nn.Embedding(num_classes, 28 * 28)
 
         self.main = nn.Sequential(
@@ -83,7 +80,6 @@ class CDiscriminator(nn.Module):
         )
         
     def forward(self, x, c):
-        # TODO
         c_emb = self.label_emb(c).view(-1, 1, 28, 28)
         x = torch.cat([x, c_emb], dim=1)  
         return self.main(x)
@@ -132,7 +128,6 @@ class CDCGAN(L.LightningModule):
         self.untoggle_optimizer(opt_g)
 
         # discriminator_step
-        # TODO
         self.toggle_optimizer(opt_d)
         z = torch.randn(batch_size, self.nz, device=self.device)
         fake = self(z, c).detach()
