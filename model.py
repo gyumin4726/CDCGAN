@@ -13,7 +13,7 @@ from einops.layers.torch import Rearrange
 
 #############################
 class CGenerator(nn.Module):
-    def __init__(self, num_classes=10, nz=100):
+    def __init__(self, num_classes=10, nz=5):
         super().__init__()
 
         self.nz = nz
@@ -87,7 +87,7 @@ class CDiscriminator(nn.Module):
 
 
 class CDCGAN(L.LightningModule):
-    def __init__(self, num_classes=10, nz=100, lr=0.0002, beta1=0.5):
+    def __init__(self, num_classes=10, nz=5, lr=0.0002, beta1=0.5):
         super().__init__()
         self.automatic_optimization = False
 
