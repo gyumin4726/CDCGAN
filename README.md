@@ -92,39 +92,59 @@ python gradio_test.py
 ## 모델 아키텍처
 
 ### Generator
-- 입력: 
-  - 잠재 벡터(z): 5차원
-  - 클래스 레이블(c): 10개 클래스
-- 구조: 
-  - 잠재 벡터를 50차원으로 투영 (Linear 레이어)
-  - 클래스 레이블을 50차원으로 임베딩 (Embedding 레이어)
-  - 두 임베딩을 결합하여 100차원 벡터 생성
-  - 100차원 벡터를 256 * 7 * 7 크기로 투영
-  - 배치 정규화와 LeakyReLU 적용
-  - 첫 번째 전치 합성곱 레이어: 256채널 → 128채널, 커널 크기 5, 스트라이드 1
-  - 배치 정규화, LeakyReLU, MaxPool2d 적용
-  - 두 번째 전치 합성곱 레이어: 128채널 → 64채널, 커널 크기 4, 스트라이드 2
-  - 배치 정규화, LeakyReLU, AvgPool2d 적용
-  - 세 번째 전치 합성곱 레이어: 64채널 → 1채널, 커널 크기 4, 스트라이드 2
-  - Tanh 활성화 함수 적용
-  - CenterCrop을 통한 28x28 크기로 조정
-- 출력: 28x28 크기의 MNIST 스타일 이미지
+1. **입력 처리**
+   - 잠재 벡터(z): 5차원 → 50차원 (Linear)
+   - 클래스 레이블(c): 10개 클래스 → 50차원 (Embedding)
+   - 결합: 100차원 벡터 → 256×7×7 (Linear)
+
+2. **레이어별 구조**
+   ```
+   입력: 256×7×7
+   ↓
+   Layer 1: 256×7×7 → 128×7×7
+   - ConvTranspose2d(256→128, kernel=5, stride=1, padding=2)
+   - BatchNorm2d + LeakyReLU
+   - MaxPool2d(kernel=2, stride=1, padding=1)
+   ↓
+   Layer 2: 128×7×7 → 64×14×14
+   - ConvTranspose2d(128→64, kernel=4, stride=2, padding=1)
+   - BatchNorm2d + LeakyReLU
+   - AvgPool2d(kernel=2, stride=1, padding=1)
+   ↓
+   Layer 3: 64×14×14 → 1×28×28
+   - ConvTranspose2d(64→1, kernel=4, stride=2, padding=1)
+   - Tanh
+   ↓
+   출력: 1×28×28 (CenterCrop)
+   ```
 
 ### Discriminator
-- 입력: 
-  - 이미지 (1x28x28)
-  - 클래스 레이블 임베딩 (1x28x28)
-- 구조: 
-  - 클래스 레이블을 28x28 크기로 임베딩
-  - 이미지와 클래스 임베딩을 채널 차원에서 결합하여 2채널 입력 생성
-  - 첫 번째 합성곱 레이어: 2채널 → 64채널, 커널 크기 4, 스트라이드 2
-  - LeakyReLU 활성화 함수와 0.3 드롭아웃 적용
-  - 두 번째 합성곱 레이어: 64채널 → 128채널, 커널 크기 4, 스트라이드 2
-  - LeakyReLU 활성화 함수와 0.3 드롭아웃 적용
-  - Flatten 레이어를 통한 128 * 7 * 7 크기의 특징 맵 생성
-  - 최종 선형 레이어를 통한 진위 여부 판별
-  - Sigmoid 활성화 함수를 통한 0~1 사이의 출력값 생성
-- 출력: 이미지의 진위 여부 (0~1 사이의 값)
+1. **입력 처리**
+   - 이미지: 1×28×28
+   - 클래스 레이블: 10개 클래스 → 1×28×28 (Embedding)
+   - 결합: 2×28×28 (채널 차원에서 결합)
+
+2. **레이어별 구조**
+   ```
+   입력: 2×28×28
+   ↓
+   Layer 1: 2×28×28 → 64×14×14
+   - Conv2d(2→64, kernel=4, stride=2, padding=1)
+   - LeakyReLU
+   - Dropout(0.3)
+   ↓
+   Layer 2: 64×14×14 → 128×7×7
+   - Conv2d(64→128, kernel=4, stride=2, padding=1)
+   - LeakyReLU
+   - Dropout(0.3)
+   ↓
+   Layer 3: 128×7×7 → 1
+   - Flatten
+   - Linear(128×7×7 → 1)
+   - Sigmoid
+   ↓
+   출력: 진위 여부 (0~1 사이의 값)
+   ```
 
 ## 하이퍼파라미터
 
